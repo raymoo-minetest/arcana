@@ -22,6 +22,7 @@ arcana.Effect = Effect
 -- @table EffectDefinition
 
 --- How to apply an effect to a target
+-- @tparam Effect self
 -- @tparam Target target
 -- @function ActionCallback
 
@@ -68,7 +69,7 @@ end
 -- @function Effect:apply
 function effect_meta:apply(target)
 	assert(target)
-	self:def().action(target)
+	self:def().action(self, target)
 end
 
 --- Serialize an effect
