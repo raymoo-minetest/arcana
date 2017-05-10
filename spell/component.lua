@@ -27,7 +27,51 @@ arcana.Component = Component
 --- How to apply a component to a target
 -- @tparam Component self
 -- @tparam Target target
+-- @tparam SpellContext context
+-- @table child_components Components that are chained after this one
 -- @function ActionCallback
+
+--- Spell context
+-- @section context
+
+--- Useful context for spell components
+-- @tparam Caster caster
+-- @table SpellContext
+
+--- Table to specify what cast a spell
+-- @tparam string type One of "player", "node", or "none"
+-- @tparam ?string name For players, is the player name.
+-- @tparam ?string key For nodes, is a random key that should also be stored in
+-- the node meta in the "arcana_key" field.
+-- @tparam ?vector ?pos When the caster is a node, this is its position.
+-- @table Caster
+
+--- Construct a nonspecific caster
+-- @treturn Caster
+function arcana.Component.null_caster()
+	return {
+		type = "none",
+	}
+end
+
+--- Construct a player caster
+-- @tparam ObjectRef player
+-- @treturn Caster
+function arcana.Component.player_caster(player)
+	local p_type = type(player)
+	local pname
+	if p_type == "userdata" and p_type:is_player() then
+		pname = player:get_player_name()
+	elseif p_type == "string" then
+		pname = player
+	else
+		error("Expected a player name or ObjectRef")
+	end
+	return {
+		type = "player",
+		name = pname,
+	}
+end
 
 Component.registered = {}
 
@@ -68,10 +112,11 @@ end
 
 --- Apply a component
 -- @tparam Target target
+-- @tparam SpellContext context
 -- @function Component:apply
-function comp_meta:apply(target)
+function comp_meta:apply(target, context)
 	assert(target)
-	self:def().action(self, target)
+	self:def().action(self, target, context, {})
 end
 
 --- Serialize a component
