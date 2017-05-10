@@ -18,6 +18,9 @@ arcana.Component = Component
 -- @string name A unique ID, prefixed with a mod name as in "arcana:punch"
 -- @string description The name that is displayed to the user
 -- @string texture A texture displayed to the user
+-- @string type One of "effect", "payload", or "shape".
+-- Effects cannot chain any spell components after it, payloads can only chain
+-- effects, and shapes can chain any kind of component, including other shapes.
 -- @tparam ActionCallback action How to apply a component
 -- @table ComponentDefinition
 
