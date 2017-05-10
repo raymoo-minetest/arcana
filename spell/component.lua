@@ -28,7 +28,6 @@ arcana.Component = Component
 -- @tparam Component self
 -- @tparam Target target
 -- @tparam SpellContext context
--- @table child_components Components that are chained after this one
 -- @function ActionCallback
 
 --- Spell context
@@ -136,3 +135,16 @@ function arcana.Component.deserialize(str)
 	end
 	return Component.new(tab.name)
 end
+
+-- Internal component for when a spell is cast
+arcana.Component.register({
+	name = "initial", -- Exception for prefix rule
+	description = "Spell Core",
+	texture = "default_stone.png",
+	type = "shape",
+	action = function(self, target, context)
+		for i, child in ipairs(children) do
+			child:apply(target, context)
+		end
+	end,
+})
