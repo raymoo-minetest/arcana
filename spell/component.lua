@@ -100,7 +100,10 @@ function arcana.Component.new(name)
 	if not Component.registered[name] then
 		error("Non existent component " .. name)
 	end
-	local comp = { name = name }
+	local comp = {
+		name = name,
+		child_components = {},
+	}
 	setmetatable(comp, comp_meta)
 	return comp
 end
@@ -118,11 +121,65 @@ function comp_meta:apply(target, context)
 	self:def().action(self, target, context, {})
 end
 
+--- Apply the children of a component
+-- @tparam Target target
+-- @tparam SpellContext context
+-- @function Component:apply_children
+function comp_meta:apply_children(target, context)
+	Component.apply_list(self.child_components, target, context)
+end
+
+--- Apply a list of components
+-- @table components
+-- @tparam Target target
+-- @tparam SpellContext context
+function arcana.Component.apply_list(components, target, context)
+	for i, comp in ipairs(components) do
+		comp:apply(target, context)
+	end
+end
+
+local function valid_chain(parent, child)
+	if parent == "effect" then
+		return false
+	elseif parent == "payload" then
+		return child == "effect"
+	elseif parent == "shape" then
+		return true
+	else
+		error("Invalid component type: " .. parent)
+	end
+end
+
+--- Chain a child component
+-- @tparam component
+-- @function Component:add_child
+function comp_meta:add_child(component)
+	assert(getmetatable(component) == comp_meta)
+	assert(valid_chain(self:def().type, component:def().type))
+	assert(self ~= component) -- Make sure no loops
+	table.insert(self.child_components, component)
+end
+
+--- Gets a list of children
+-- @treturn table
+-- @function Component:children
+function comp_meta:children()
+	return self.child_components
+end
+
 --- Serialize a component
 -- @treturn string
 -- @function Component:serialize
 function comp_meta:serialize()
-	return minetest.serialize({ name = self.name })
+	local child_strs = {}
+	for i, child in ipairs(self.child_components) do
+		child_strs[i] = child:serialize()
+	end
+	return minetest.serialize({
+		name = self.name,
+		child_strs = child_strs,
+	})
 end
 
 --- Deserialize a component
@@ -133,18 +190,22 @@ function arcana.Component.deserialize(str)
 	if not tab.name or not Component.registered[tab.name] then
 		return nil
 	end
-	return Component.new(tab.name)
+	local child_strs = tab.child_strs or {}
+	local comp = Component.new(tab.name)
+	for i, child_str in ipairs(child_strs) do
+		local child = arcana.Component.deserialize(child_str)
+		comp:add_child(child)
+	end
+	return comp
 end
 
 -- Internal component for when a spell is cast
-arcana.Component.register({
+Component.register({
 	name = "initial", -- Exception for prefix rule
 	description = "Spell Core",
 	texture = "default_stone.png",
 	type = "shape",
 	action = function(self, target, context)
-		for i, child in ipairs(children) do
-			child:apply(target, context)
-		end
+		self:apply_children(target, context)
 	end,
 })
