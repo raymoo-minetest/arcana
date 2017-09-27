@@ -59,7 +59,7 @@ end
 function arcana.Component.player_caster(player)
 	local p_type = type(player)
 	local pname
-	if p_type == "userdata" and p_type:is_player() then
+	if p_type == "userdata" and player:is_player() then
 		pname = player:get_player_name()
 	elseif p_type == "string" then
 		pname = player

@@ -45,7 +45,7 @@ end)
 
 --- Construct a target using an object
 -- @tparam vector pos
--- @tparam vector dir
+-- @tparam ?vector dir
 -- @tparam ObjectRef ref
 -- @treturn Target
 -- @function arcana.Target.object
@@ -60,5 +60,24 @@ Target.object = metad(function(pos, dir, ref)
 		ref = ref,
 	}
 end)
+
+--- Construct a casting target for a player
+-- @tparam ObjectRef player
+function Target.casted(player)
+	local cast_pos = vector.add(player:get_pos(), arcana.look_offset)
+	local cast_dir = player:get_look_dir()
+
+	return Target.object(cast_pos, cast_dir, player)
+end
+
+--- Get the "look position" of a target.
+-- @treturn vector
+function Target:look_position()
+	if self.type == "object" and self.ref:is_player() then
+		return vector.add(self.ref:get_pos(), arcana.look_offset)
+	else
+		return self.pos
+	end
+end
 
 arcana.Target = Target
