@@ -30,7 +30,7 @@ arcana.Component.register({
 
 -- Applies something in front
 -- Technically more like short-range telekinesis
-local touch_width = 10
+local touch_width = 60
 local touch_range = 2
 arcana.Component.register({
 	name = "arcana:touch",
