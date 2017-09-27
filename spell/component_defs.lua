@@ -1,11 +1,20 @@
 
+-- Passes the target through
+arcana.Component.register({
+	name = "arcana:initial",
+	description = "Pass-through",
+	type = "shape",
+	action = function(self, target, context)
+		self:apply_children(target, context)
+	end,
+})
+
 -- Applies something in look direction
 local telekinesis_width = 10
 local telekinesis_range = 10
 arcana.Component.register({
 	name = "arcana:telekinesis",
-	description = "Applies to the node or object looked at.",
-	texture = "default_stone.png",
+	description = "Telekinesis",
 	type = "shape",
 	action = function(self, target, context)
 		local cone_pos = target.pos
@@ -25,8 +34,7 @@ local touch_width = 10
 local touch_range = 2
 arcana.Component.register({
 	name = "arcana:touch",
-	description = "Applies the effect to the touched node or object.",
-	texture = "default_stone.png",
+	description = "Touch",
 	type = "shape",
 	action = function(self, target, context)
 		local cone_pos = target.pos
@@ -42,8 +50,7 @@ arcana.Component.register({
 
 arcana.Component.register({
 	name = "arcana:mini_explosion",
-	description = "Creates a small explosion.",
-	texture = "default_stone.png",
+	description = "Mini Explosion",
 	type = "effect",
 	action = function(self, target)
 		tnt.boom(target.pos, {

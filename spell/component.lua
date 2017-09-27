@@ -85,6 +85,12 @@ function arcana.Component.register(def)
 		error("Component definitions must have a name.")
 	end
 	Component.registered[name] = def
+
+	minetest.register_craftitem(def.name, {
+		description = def.description,
+		inventory_image = def.texture or "arcana_component.png",
+		stack_max = 1,
+	})
 end
 
 --- Spell components
@@ -92,6 +98,13 @@ end
 
 local comp_meta = {}
 comp_meta.__index = comp_meta
+
+--- Check if a component exists
+-- @string name
+-- @treturn bool
+function arcana.Component.exists(name)
+	return Component.registered[name] ~= nil
+end
 
 --- Construct a component
 -- @string name The name of the registered component
@@ -194,18 +207,9 @@ function arcana.Component.deserialize(str)
 	local comp = Component.new(tab.name)
 	for i, child_str in ipairs(child_strs) do
 		local child = arcana.Component.deserialize(child_str)
-		comp:add_child(child)
+		if child then
+			comp:add_child(child)
+		end
 	end
 	return comp
 end
-
--- Internal component for when a spell is cast
-Component.register({
-	name = "initial", -- Exception for prefix rule
-	description = "Spell Core",
-	texture = "default_stone.png",
-	type = "shape",
-	action = function(self, target, context)
-		self:apply_children(target, context)
-	end,
-})

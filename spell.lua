@@ -4,6 +4,7 @@
 
 arcana.load("spell/target.lua")
 arcana.load("spell/component.lua")
+arcana.load("spell/design.lua")
 arcana.load("spell/component_defs.lua")
 
 local Component = arcana.Component
