@@ -17,6 +17,7 @@ local telekinesis_range = 10
 register({
 	name = "arcana:telekinesis",
 	description = "Telekinesis",
+	texture = "arcana_telekinesis.png",
 	type = "shape",
 	action = function(self, target, context)
 		local cone_pos = target.pos
@@ -37,6 +38,7 @@ local touch_range = 2
 register({
 	name = "arcana:touch",
 	description = "Touch",
+	texture = "arcana_touch.png",
 	type = "shape",
 	action = function(self, target, context)
 		local cone_pos = target.pos
@@ -54,6 +56,7 @@ local heal_amount = 5
 register({
 	name = "arcana:heal",
 	description = "Heal (2.5)",
+	texture = "arcana_heal.png",
 	type = "effect",
 	action = function(self, target)
 		if target.type == "object" then
@@ -69,6 +72,7 @@ register({
 register({
 	name = "arcana:mini_explosion",
 	description = "Mini Explosion",
+	texture = "arcana_mini_explosion.png",
 	type = "effect",
 	action = function(self, target)
 		tnt.boom(target.pos, {
