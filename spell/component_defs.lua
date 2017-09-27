@@ -1,6 +1,8 @@
 
+local register = arcana.Component.register
+
 -- Passes the target through
-arcana.Component.register({
+register({
 	name = "arcana:initial",
 	description = "Pass-through",
 	type = "shape",
@@ -12,7 +14,7 @@ arcana.Component.register({
 -- Applies something in look direction
 local telekinesis_width = 10
 local telekinesis_range = 10
-arcana.Component.register({
+register({
 	name = "arcana:telekinesis",
 	description = "Telekinesis",
 	type = "shape",
@@ -32,7 +34,7 @@ arcana.Component.register({
 -- Technically more like short-range telekinesis
 local touch_width = 60
 local touch_range = 2
-arcana.Component.register({
+register({
 	name = "arcana:touch",
 	description = "Touch",
 	type = "shape",
@@ -48,7 +50,23 @@ arcana.Component.register({
 	end,
 })
 
-arcana.Component.register({
+local heal_amount = 5
+register({
+	name = "arcana:heal",
+	description = "Heal (2.5)",
+	type = "effect",
+	action = function(self, target)
+		if target.type == "object" then
+			local old_hp = target.ref:get_hp()
+			-- Don't heal dead people
+			if old_hp > 0 then
+				target.ref:set_hp(old_hp + heal_amount)
+			end
+		end
+	end,
+})
+
+register({
 	name = "arcana:mini_explosion",
 	description = "Mini Explosion",
 	type = "effect",
