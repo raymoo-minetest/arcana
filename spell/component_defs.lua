@@ -11,6 +11,20 @@ register({
 	end,
 })
 
+local function cone_action(width, range)
+	return function(self, target, context)
+		local cone_pos = target.pos
+		local cone_dir = target.dir
+		local target = arcana.target_in_cone(cone_pos, cone_dir,
+			width, range, target.ref)
+
+		if target then
+			self:apply_children(target, context)
+		end
+
+	end
+end
+
 -- Applies something in look direction
 local telekinesis_width = 10
 local telekinesis_range = 10
@@ -19,16 +33,7 @@ register({
 	description = "Telekinesis",
 	texture = "arcana_telekinesis.png",
 	type = "shape",
-	action = function(self, target, context)
-		local cone_pos = target.pos
-		local cone_dir = target.dir
-		local target = arcana.target_in_cone(cone_pos, cone_dir,
-			telekinesis_width, telekinesis_range, target.ref)
-
-		if target then
-			self:apply_children(target, context)
-		end
-	end,
+	action = cone_action(telekinesis_width, telekinesis_range)
 })
 
 -- Applies something in front
@@ -40,18 +45,65 @@ register({
 	description = "Touch",
 	texture = "arcana_touch.png",
 	type = "shape",
-	action = function(self, target, context)
-		local cone_pos = target.pos
-		local cone_dir = target.dir
-		local target = arcana.target_in_cone(cone_pos, cone_dir,
-			touch_width, touch_range, target.ref)
-
-		if target then
-			self:apply_children(target, context)
-		end
-	end,
+	action = cone_action(touch_width, touch_range)
 })
 
+local cone_width = 45
+local cone_range = 5
+
+local function make_cone_particlespawners(low, high, amount)
+	minetest.add_particlespawner({
+		amount = amount,
+		time = 0.1,
+		minpos = low,
+		maxpos = high,
+		minexptime = 0.5,
+		maxexptime = 2,
+		texture = "arcana_projectile_1.png",
+		glow = 15,
+	})
+	minetest.add_particlespawner({
+		amount = amount,
+		time = 0.1,
+		minpos = low,
+		maxpos = high,
+		minexptime = 0.5,
+		maxexptime = 2,
+		texture = "arcana_projectile_2.png",
+		glow = 15,
+	})
+end
+
+register({
+	name = "arcana:cone",
+	description = "Cone",
+	texture = "arcana_cone.png",
+	type = "shape",
+	action = function(self, target, context)
+		local entities =
+			arcana.entities_in_cone(target.pos, target.dir, cone_width, cone_range)
+		for _, object in ipairs(entities) do
+			if object ~= target.ref then
+				local pos = arcana.object_center(object)
+				local dir = vector.normalize(vector.subtract(pos, target.pos))
+				local target = arcana.Target.object(pos, dir, object)
+				self:apply_children(target)
+			end
+		end
+
+		-- Special effects
+		local midpoint =
+			vector.add(vector.multiply(target.dir, 0.5 * cone_range), target.pos)
+		local endpoint =
+			vector.add(vector.multiply(target.dir, cone_range), target.pos)
+		local small_low, small_high = vector.sort(target.pos, midpoint)
+		local large_low, large_high = vector.sort(midpoint, endpoint)
+
+		make_cone_particlespawners(small_low, small_high, 10)
+		make_cone_particlespawners(large_low, large_high, 30)
+	end,
+})
+	
 local projectile_speed = 8
 local projectile_life = 10
 
@@ -133,6 +185,22 @@ register({
 			if old_hp > 0 then
 				target.ref:set_hp(old_hp + heal_amount)
 			end
+		end
+	end,
+})
+
+local harm_amount = 5
+register({
+	name = "arcana:punch",
+	description = "Damage (2.5)",
+	texture = "arcana_punch.png",
+	type = "effect",
+	action = function(self, target)
+		if target.type == "object" then
+			target.ref:punch(target.ref, 1, {
+				full_punch_interval = 1,
+				damage_groups = { fleshy = harm_amount },
+				}, nil)
 		end
 	end,
 })
