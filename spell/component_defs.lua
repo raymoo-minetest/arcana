@@ -52,6 +52,73 @@ register({
 	end,
 })
 
+local projectile_speed = 8
+local projectile_life = 10
+
+minetest.register_entity("arcana:projectile", {
+	physical = false,
+	collide_with_objects = false,
+	collisionbox = { 0, 0, 0, 0, 0, 0 },
+	visual = "cube",
+	visual_size = { x = 0, y = 0 },
+	on_step = function(self, dtime)
+		if not self.spell then
+			self.object:remove()
+			return
+		end
+
+		local pos = self.object:get_pos()
+		local vel = self.object:get_velocity()
+		local target = arcana.target_at_point(pos, vel, self.exclude)
+
+		if target then
+			self.spell:apply_children(target)
+			self.spell = nil
+		end
+	end,
+})
+
+local function spawn_projectile(point, dir, spell, exclude)
+	local obj = minetest.add_entity(point, "arcana:projectile")
+	local ent = obj:get_luaentity()
+	if not ent then return end
+
+	obj:set_velocity(vector.multiply(vector.normalize(dir), projectile_speed))
+	ent.spell = spell
+	ent.life = projectile_life
+	ent.exclude = exclude
+
+	obj:set_armor_groups({ immortal = 1 })
+	
+	minetest.add_particlespawner({
+		amount = 20,
+		time = 0,
+		minvel = { x = -2, y = -2, z = -2 },
+		maxvel = { x = 2, y = 2, z = 2 },
+		attached = obj,
+		texture = "arcana_projectile_1.png",
+		glow = 15,
+	})
+	minetest.add_particlespawner({
+		amount = 20,
+		time = 0,
+		minvel = { x = -2, y = -2, z = -2 },
+		maxvel = { x = 2, y = 2, z = 2 },
+		attached = obj,
+		texture = "arcana_projectile_2.png",
+		glow = 15,
+	})
+end
+
+register({
+	name = "arcana:projectile",
+	description = "Projectile",
+	type = "shape",
+	action = function(self, target, context)
+		spawn_projectile(target.pos, target.dir, self, target.ref)
+	end,
+})
+	
 local heal_amount = 5
 register({
 	name = "arcana:heal",

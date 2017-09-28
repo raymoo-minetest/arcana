@@ -20,12 +20,12 @@ local components_inv =
 		components_inv_callbacks)
 
 local design_formspec = "\
-size[5,6]\
+size[5,7]\
 label[0,0;Design:]\
 list[context;design;0,1;5,1]\
 label[0,3;Available components:]\
 list[detached:arcana:components;main;0,4;5,2]\
-button[1.5,5;2,1;dispense;Dispense]\
+button[1.5,6;2,1;dispense;Dispense]\
 "
 
 local effect_level = 0
