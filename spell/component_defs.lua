@@ -113,6 +113,7 @@ end
 register({
 	name = "arcana:projectile",
 	description = "Projectile",
+	texture = "arcana_projectile.png",
 	type = "shape",
 	action = function(self, target, context)
 		spawn_projectile(target.pos, target.dir, self, target.ref)
