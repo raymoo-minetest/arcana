@@ -143,19 +143,23 @@ local function spawn_projectile(point, dir, spell, exclude)
 	obj:set_armor_groups({ immortal = 1 })
 	
 	minetest.add_particlespawner({
-		amount = 20,
+		amount = 40,
 		time = 0,
-		minvel = { x = -2, y = -2, z = -2 },
-		maxvel = { x = 2, y = 2, z = 2 },
+		minpos = { x = -0.1, y = -0.1, z = -0.1 },
+		maxpos = { x = 0.1, y = 0.1, z = 0.1 },
+		minexptime = 0.2,
+		maxexptime = 0.5,
 		attached = obj,
 		texture = "arcana_projectile_1.png",
 		glow = 15,
 	})
 	minetest.add_particlespawner({
-		amount = 20,
+		amount = 40,
 		time = 0,
-		minvel = { x = -2, y = -2, z = -2 },
-		maxvel = { x = 2, y = 2, z = 2 },
+		minpos = { x = -0.1, y = -0.1, z = -0.1 },
+		maxpos = { x = 0.1, y = 0.1, z = 0.1 },
+		minexptime = 0.2,
+		maxexptime = 0.5,
 		attached = obj,
 		texture = "arcana_projectile_2.png",
 		glow = 15,
