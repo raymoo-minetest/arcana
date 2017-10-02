@@ -22,6 +22,7 @@ arcana.Component = Component
 -- Effects cannot chain any spell components after it, payloads can only chain
 -- effects, and shapes can chain any kind of component, including other shapes.
 -- @tparam ActionCallback action How to apply a component
+-- @tparam CostCalculator|number cost The cost of a component
 -- @table ComponentDefinition
 
 --- How to apply a component to a target
@@ -29,6 +30,11 @@ arcana.Component = Component
 -- @tparam Target target
 -- @tparam SpellContext context
 -- @function ActionCallback
+
+--- How to calculate the cost of using a component
+-- @tparam Component self
+-- @treturn number
+-- @function CostCalculator
 
 --- Spell context
 -- @section context
@@ -179,6 +185,32 @@ end
 -- @function Component:children
 function comp_meta:children()
 	return self.child_components
+end
+
+--- Get the cost of a component
+-- @treturn number
+-- @function Component:cost
+function comp_meta:cost()
+	local cost = self:def().cost
+	local cost_type = type(cost)
+	if cost_type == "number" then
+		return cost
+	elseif cost_type == "function" then
+		return cost(self)
+	else
+		error("Invalid cost")
+	end
+end
+
+--- Get the sum of the child costs
+-- @treturn number
+-- @function Component:children_cost
+function comp_meta:children_cost()
+	local total = 0
+	for _, child in ipairs(self:children()) do
+		total = total + child:cost()
+	end
+	return total
 end
 
 --- Serialize a component

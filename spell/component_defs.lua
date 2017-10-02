@@ -1,6 +1,12 @@
 
 local register = arcana.Component.register
 
+local function multiplier_cost(multiplier)
+	return function(self)
+		return self:children_cost() * multiplier
+	end
+end
+
 -- Passes the target through
 register({
 	name = "arcana:initial",
@@ -9,6 +15,7 @@ register({
 	action = function(self, target, context)
 		self:apply_children(target, context)
 	end,
+	cost = multiplier_cost(1)
 })
 
 local function cone_action(width, range)
@@ -33,7 +40,8 @@ register({
 	description = "Telekinesis",
 	texture = "arcana_telekinesis.png",
 	type = "shape",
-	action = cone_action(telekinesis_width, telekinesis_range)
+	action = cone_action(telekinesis_width, telekinesis_range),
+	cost = multiplier_cost(3),
 })
 
 -- Applies something in front
@@ -45,7 +53,8 @@ register({
 	description = "Touch",
 	texture = "arcana_touch.png",
 	type = "shape",
-	action = cone_action(touch_width, touch_range)
+	action = cone_action(touch_width, touch_range),
+	cost = multiplier_cost(1.5),
 })
 
 local cone_width = 45
@@ -102,6 +111,7 @@ register({
 		make_cone_particlespawners(small_low, small_high, 10)
 		make_cone_particlespawners(large_low, large_high, 30)
 	end,
+	cost = multiplier_cost(5),
 })
 	
 local projectile_speed = 8
@@ -174,6 +184,7 @@ register({
 	action = function(self, target, context)
 		spawn_projectile(target.pos, target.dir, self, target.ref)
 	end,
+	cost = multiplier_cost(2),
 })
 	
 local heal_amount = 5
@@ -191,6 +202,7 @@ register({
 			end
 		end
 	end,
+	cost = heal_amount * 3,
 })
 
 local harm_amount = 5
@@ -207,6 +219,7 @@ register({
 				}, nil)
 		end
 	end,
+	cost = harm_amount,
 })
 
 register({
@@ -220,4 +233,5 @@ register({
 			damage_radius = 4,
 		})
 	end,
+	cost = 20,
 })

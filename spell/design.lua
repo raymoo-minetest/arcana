@@ -96,10 +96,7 @@ minetest.register_craftitem("arcana:wand", {
 			local spell = Component.deserialize(serialized)
 
 			if spell then
-				local target = Target.casted(user)
-				spell:apply(target, {
-					caster = Component.player_caster(user)
-				})
+				arcana.begin_casting(user, spell, spell:cost())
 			end
                 end
         end,
