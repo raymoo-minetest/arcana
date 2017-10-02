@@ -117,13 +117,15 @@ register({
 local projectile_speed = 8
 local projectile_life = 10
 local projectile_radius = 0.2
+local ape = "arcana_projectile_entity.png"
 
 minetest.register_entity("arcana:projectile", {
 	physical = false,
 	collide_with_objects = false,
 	collisionbox = { 0, 0, 0, 0, 0, 0 },
 	visual = "cube",
-	visual_size = { x = 0, y = 0 },
+	visual_size = { x = 2 * projectile_radius, y = 2 * projectile_radius },
+	textures = { ape, ape, ape, ape, ape, ape },
 	on_step = function(self, dtime)
 		if not self.spell then
 			self.object:remove()

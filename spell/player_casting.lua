@@ -73,7 +73,7 @@ local function update_state(pname, state, dtime)
 	end
 
 	-- If a player has switched or lost their casting item then reset.
-	if item_id and player_item_id(player) ~= state.item_id then
+	if state.item_id and player_item_id(player) ~= state.item_id then
 		hide_state(player, state)
 		return {}
 	end
