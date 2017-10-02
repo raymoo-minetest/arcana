@@ -45,6 +45,7 @@ function arcana.begin_casting(player, spell, cost, item_id)
 		maxvel = { x = 0, y = 2, z = 0 },
 		attached = player,
 		texture = "arcana_projectile_1.png",
+		glow = 15,
 	})
 	
 	local new_state = {

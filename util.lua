@@ -21,13 +21,14 @@ function arcana.object_center(obj)
 	end
 end
 
-function arcana.within(low, high, point)
-	return low.x < point.x and high.x > point.x
-		and low.y < point.y and high.y > point.y
-		and low.z < point.z and high.z > point.z
+function arcana.within(low, high, point, radius)
+	radius = radius or 0
+	return low.x < point.x + radius and high.x > point.x - radius
+		and low.y < point.y + radius and high.y > point.y - radius
+		and low.z < point.z + radius and high.z > point.z - radius
 end
 
-function arcana.point_in_object(point, obj)
+function arcana.point_in_object(point, obj, radius)
 	local obj_center = arcana.object_center(obj)
 	local collisionbox = obj:get_properties().collisionbox
 
@@ -43,7 +44,7 @@ function arcana.point_in_object(point, obj)
 		z = obj_center.z + collisionbox[6],
 	}
 
-	return arcana.within(low, high, point)
+	return arcana.within(low, high, point, radius)
 end
 
 --- Returns a list of entities in a specified cone.
@@ -135,7 +136,7 @@ end
 -- @tparam vector point
 -- @tparam vector dir
 -- @treturns ?Target
-function arcana.target_at_point(point, dir, exclude)
+function arcana.target_at_point(point, dir, radius, exclude)
 	local objects = minetest.get_objects_inside_radius(point, 5)
 	local object_target
 	for _, object in ipairs(objects) do

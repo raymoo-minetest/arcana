@@ -116,6 +116,7 @@ register({
 	
 local projectile_speed = 8
 local projectile_life = 10
+local projectile_radius = 0.2
 
 minetest.register_entity("arcana:projectile", {
 	physical = false,
@@ -131,7 +132,7 @@ minetest.register_entity("arcana:projectile", {
 
 		local pos = self.object:get_pos()
 		local vel = self.object:get_velocity()
-		local target = arcana.target_at_point(pos, vel, self.exclude)
+		local target = arcana.target_at_point(pos, vel, projectile_radius, self.exclude)
 
 		if target then
 			self.spell:apply_children(target)
@@ -151,12 +152,13 @@ local function spawn_projectile(point, dir, spell, exclude)
 	ent.exclude = exclude
 
 	obj:set_armor_groups({ immortal = 1 })
-	
+
+	local p_r = projectile_radius
 	minetest.add_particlespawner({
-		amount = 40,
+		amount = 400 * p_r,
 		time = 0,
-		minpos = { x = -0.1, y = -0.1, z = -0.1 },
-		maxpos = { x = 0.1, y = 0.1, z = 0.1 },
+		minpos = { x = -p_r, y = -p_r, z = -p_r },
+		maxpos = { x = p_r, y = p_r, z = p_r },
 		minexptime = 0.2,
 		maxexptime = 0.5,
 		attached = obj,
@@ -164,10 +166,10 @@ local function spawn_projectile(point, dir, spell, exclude)
 		glow = 15,
 	})
 	minetest.add_particlespawner({
-		amount = 40,
+		amount = 400 * p_r,
 		time = 0,
-		minpos = { x = -0.1, y = -0.1, z = -0.1 },
-		maxpos = { x = 0.1, y = 0.1, z = 0.1 },
+		minpos = { x = -p_r, y = -p_r, z = -p_r },
+		maxpos = { x = p_r, y = p_r, z = p_r },
 		minexptime = 0.2,
 		maxexptime = 0.5,
 		attached = obj,
