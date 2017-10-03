@@ -95,9 +95,14 @@ minetest.register_craftitem("arcana:wand", {
 			local serialized = meta:get_string("spell")
 			local spell = Component.deserialize(serialized)
 
+			local id = tostring(math.random(1000000))
+			meta:set_string("arcana:id", id)
+
 			if spell then
-				arcana.begin_casting(user, spell, spell:cost())
+				arcana.begin_casting(user, spell, spell:cost(), id)
 			end
+
+			return itemstack
                 end
         end,
 })

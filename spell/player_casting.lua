@@ -22,6 +22,8 @@ local function display_state(player, state)
 end
 
 local function hide_state(player, state)
+	if not state.spell then return end
+	
 	hb.hide_hudbar(player, "arcana:charge")
 	minetest.delete_particlespawner(state.spawner)
 end
@@ -47,7 +49,8 @@ function arcana.begin_casting(player, spell, cost, item_id)
 		texture = "arcana_projectile_1.png",
 		glow = 15,
 	})
-	
+
+	local pname = player:get_player_name()
 	local new_state = {
 		spell = spell,
 		cost = cost,
@@ -56,7 +59,8 @@ function arcana.begin_casting(player, spell, cost, item_id)
 		spawner = effect_spawner,
 	}
 
-	casting_states[player:get_player_name()] = new_state
+	hide_state(player, casting_states[pname])
+	casting_states[pname] = new_state
 	display_state(player, new_state)
 end
 
