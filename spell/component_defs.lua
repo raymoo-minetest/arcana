@@ -30,7 +30,7 @@ local function cone_action(width, range, strike_air)
 		elseif strike_air then
 			local backup_pos =
 				vector.add(cone_pos, vector.multiply(cone_dir, range))
-			self:apply_children(arcana.Target.pos(backup_pos, cone_dir))
+			self:apply_children(arcana.Target.pos(backup_pos, cone_dir), context)
 		end
 
 	end
