@@ -18,7 +18,7 @@ register({
 	cost = multiplier_cost(1)
 })
 
-local function cone_action(width, range)
+local function cone_action(width, range, strike_air)
 	return function(self, target, context)
 		local cone_pos = target.pos
 		local cone_dir = target.dir
@@ -27,6 +27,10 @@ local function cone_action(width, range)
 
 		if target then
 			self:apply_children(target, context)
+		elseif strike_air then
+			local backup_pos =
+				vector.add(cone_pos, vector.multiply(cone_dir, range))
+			self:apply_children(arcana.Target.pos(backup_pos, cone_dir))
 		end
 
 	end
@@ -40,8 +44,8 @@ register({
 	description = "Telekinesis",
 	texture = "arcana_telekinesis.png",
 	type = "shape",
-	action = cone_action(telekinesis_width, telekinesis_range),
-	cost = multiplier_cost(3),
+	action = cone_action(telekinesis_width, telekinesis_range, true),
+	cost = multiplier_cost(2),
 })
 
 -- Applies something in front
@@ -111,7 +115,7 @@ register({
 		make_cone_particlespawners(small_low, small_high, 10)
 		make_cone_particlespawners(large_low, large_high, 30)
 	end,
-	cost = multiplier_cost(5),
+	cost = multiplier_cost(2),
 })
 	
 local projectile_speed = 8
