@@ -96,7 +96,7 @@ register({
 				local pos = arcana.object_center(object)
 				local dir = vector.normalize(vector.subtract(pos, target.pos))
 				local target = arcana.Target.object(pos, dir, object)
-				self:apply_children(target)
+				self:apply_children(target, context)
 			end
 		end
 
@@ -137,13 +137,13 @@ minetest.register_entity("arcana:projectile", {
 		local target = arcana.target_at_point(pos, vel, projectile_radius, self.exclude)
 
 		if target then
-			self.spell:apply_children(target)
+			self.spell:apply_children(target, self.context)
 			self.spell = nil
 		end
 	end,
 })
 
-local function spawn_projectile(point, dir, spell, exclude)
+local function spawn_projectile(point, dir, spell, context, exclude)
 	local obj = minetest.add_entity(point, "arcana:projectile")
 	local ent = obj:get_luaentity()
 	if not ent then return end
@@ -151,6 +151,7 @@ local function spawn_projectile(point, dir, spell, exclude)
 	obj:set_velocity(vector.multiply(vector.normalize(dir), projectile_speed))
 	ent.spell = spell
 	ent.life = projectile_life
+	ent.context = context
 	ent.exclude = exclude
 
 	obj:set_armor_groups({ immortal = 1 })
@@ -186,7 +187,7 @@ register({
 	texture = "arcana_projectile.png",
 	type = "shape",
 	action = function(self, target, context)
-		spawn_projectile(target.pos, target.dir, self, target.ref)
+		spawn_projectile(target.pos, target.dir, self, context, target.ref)
 	end,
 	cost = multiplier_cost(2),
 })
@@ -238,4 +239,63 @@ register({
 		})
 	end,
 	cost = 20,
+})
+
+local function find_close_node(pos, n)
+	n = n or 2
+	for i = 1, n do
+		local candidate = minetest.find_node_near(pos, n, "air")
+		if candidate then
+			return candidate
+		end
+	end
+
+	return nil
+end
+
+local function teleport_object(object, pos)
+	local node = minetest.get_node(pos)
+	local teleport_pos = pos
+	if minetest.registered_nodes[node.name].walkable then
+		local close_node = find_close_node(pos, 3)
+		if close_node then
+			teleport_pos = close_node
+		end
+	end
+	object:set_pos(teleport_pos)
+
+end
+
+register({
+	name = "arcana:teleport_self",
+	description = "Teleport Self to Target",
+	texture = "arcana_teleport_self.png",
+	type = "effect",
+	action = function(self, target, context)
+		local pname = context.caster.name
+		local player = pname and minetest.get_player_by_name(pname)
+		
+		if not player then return end -- Only teleport online players
+		
+		teleport_object(player, target.pos)
+	end,
+	cost = 25,
+})
+
+register({
+	name = "arcana:teleport_target",
+	description = "Teleport Target to Self",
+	texture = "arcana_teleport_target.png",
+	type = "effect",
+	action = function(self, target, context)
+		local pname = context.caster.name
+		local player = pname and minetest.get_player_by_name(pname)
+		
+		if not player then return end -- Only teleport to online players
+		
+		if target.type == "object" then
+			teleport_object(target.ref, player:get_pos())
+		end
+	end,
+	cost = 25,
 })
