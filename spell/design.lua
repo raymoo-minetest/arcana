@@ -21,9 +21,10 @@ local components_inv =
 
 local design_formspec = "\
 size[5,7]\
-label[0,0;Design:]\
-list[context;design;0,1;5,1]\
-label[0,3;Available components:]\
+field[1,1;3.5,1;spell_name;Spell Name:;Celeron's Cube Conjuration]\
+label[0,1.5;Design:]\
+list[context;design;0,2;5,1]\
+label[0,3.5;Available components:]\
 list[detached:arcana:components;main;0,4;5,2]\
 button[1.5,6;2,1;dispense;Dispense]\
 "
@@ -127,7 +128,15 @@ minetest.register_node("arcana:design_table", {
 			local spell, err = parse_recipe(inv, "design")
 			if fields.dispense and spell and sender:is_player() then
 				local item = ItemStack("arcana:wand")
-				item:get_meta():set_string("spell", spell:serialize())
+				local meta = item:get_meta()
+				meta:set_string("spell", spell:serialize())
+
+				if fields.spell_name then
+					spell_name = fields.spell_name:sub(1, 40)
+					meta:set_string("spell_name", spell_name)
+					meta:set_string("description", "Test Wand: " .. spell_name)
+				end
+
 				sender:get_inventory():add_item("main", item)
 			else
 				print("Spell design failed: ", err)
