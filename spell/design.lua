@@ -19,7 +19,7 @@ local components_inv =
 	minetest.create_detached_inventory("arcana:components",
 		components_inv_callbacks)
 
-local design_formspec = "\
+local static_formspec = "\
 size[5,7]\
 field[1,1;3.5,1;spell_name;Spell Name:;Celeron's Cube Conjuration]\
 label[0,1.5;Design:]\
@@ -28,6 +28,10 @@ label[0,3.5;Available components:]\
 list[detached:arcana:components;main;0,4;5,2]\
 button[1.5,6;2,1;dispense;Dispense]\
 "
+
+local function make_design_formspec(spell, err)
+	return static_formspec
+end
 
 local effect_level = 0
 local payload_level = 1
@@ -47,15 +51,15 @@ local level_map = {
 	shape = 2,
 }
 
+
 local function level(comp)
 	return level_map[comp:def().type]
 end
 
-local function parse_recipe(inv, list)
+local function parse_recipe(items)
 	local cur_level = -1
 	local cur_tail = {}
 
-	local items = inv:get_list(list)
 	for i=#items, 1, -1 do
 		local name = items[i]:get_name()
 		if Component.exists(name) then
@@ -108,6 +112,10 @@ minetest.register_craftitem("arcana:wand", {
         end,
 })
 
+local function update_formspec(meta, spell, err)
+	meta:set_string("formspec", make_design_formspec(spell, err))
+end
+
 minetest.register_node("arcana:design_table", {
 		description = "Spell design table",
 		groups = { choppy = 3 },
@@ -119,27 +127,29 @@ minetest.register_node("arcana:design_table", {
 		sounds = default.node_sound_wood_defaults(),
 		on_construct = function(pos)
 			local meta = minetest.get_meta(pos)
-			meta:set_string("formspec", design_formspec)
+			update_formspec(meta)
 			local inv = meta:get_inventory()
 			inv:set_size("design", 5)
 		end,
 		on_receive_fields = function(pos, formname, fields, sender)
-			local inv = minetest.get_meta(pos):get_inventory()
-			local spell, err = parse_recipe(inv, "design")
+			local node_meta = minetest.get_meta(pos)
+			local inv = node_meta:get_inventory()
+			local spell, err = parse_recipe(inv:get_list("design"))
 			if fields.dispense and spell and sender:is_player() then
 				local item = ItemStack("arcana:wand")
-				local meta = item:get_meta()
-				meta:set_string("spell", spell:serialize())
+				local item_meta = item:get_meta()
+				item_meta:set_string("spell", spell:serialize())
 
 				if fields.spell_name then
 					spell_name = fields.spell_name:sub(1, 40)
-					meta:set_string("spell_name", spell_name)
-					meta:set_string("description", "Test Wand: " .. spell_name)
+					item_meta:set_string("spell_name", spell_name)
+					item_meta:set_string("description", "Test Wand: " .. spell_name)
 				end
 
 				sender:get_inventory():add_item("main", item)
+				update_formspec(node_meta, spell)
 			else
-				print("Spell design failed: ", err)
+				update_formspec(node_meta, nil, err)
 			end
 		end,
 })
