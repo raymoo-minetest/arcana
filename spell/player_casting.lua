@@ -53,7 +53,7 @@ function arcana.begin_casting(player, spell, cost, item_id)
 	local pname = player:get_player_name()
 	local new_state = {
 		spell = spell,
-		cost = cost,
+		cost = 50 + cost,
 		item_id = item_id,
 		charge = 0,
 		spawner = effect_spawner,
@@ -88,7 +88,7 @@ local function update_state(pname, state, dtime)
 		return {}
 	end
 
-	state.charge = state.charge + 10 * dtime
+	state.charge = state.charge + 100 * dtime
 
 	-- Cast the spell if it has been charged long enough.
 	if state.charge > state.cost then
