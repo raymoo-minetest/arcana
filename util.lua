@@ -75,6 +75,21 @@ function arcana.entities_in_cone(cone_pos, cone_dir, width_deg, range)
 	return contained_entities
 end
 
+-- Casts for a node target, ignoring the first
+-- dir should be normalized
+local function node_cast(pos, dir, distance)
+	local iter = arcana.line_iterator(pos, dir, distance)
+	iter()
+	for t, node_pos in iter do
+		local node = minetest.get_node(node_pos)
+		local node_def = minetest.registered_nodes[node.name]
+		if node_def.walkable then
+			local hit_pos = vector.add(pos, vector.multiply(dir, t))
+			return t, arcana.Target.pos(hit_pos, dir)
+		end
+	end
+end
+
 --- Finds the closest target in a cone.
 -- @tparam vector cone_pos
 -- @tparam vector cone_dir
@@ -108,18 +123,9 @@ function arcana.target_in_cone(cone_pos, cone_dir, width_deg, range, exclude)
 	end
 
 	local dir_norm = vector.normalize(cone_dir)
-	local look_end = vector.add(cone_pos, vector.multiply(dir_norm, range))
-	local no_node, node_pos = minetest.line_of_sight(cone_pos, look_end, 0.1)
+	local node_distance, node_target = node_cast(cone_pos, dir_norm, range)
 
-	local node_target
-	local node_distance
-	if not no_node then
-		local node_dir = arcana.direction(cone_pos, node_pos)
-		node_target = arcana.Target.pos(node_pos, node_dir)
-		node_distance = vector.distance(cone_pos, node_pos)
-	end
-
-	if no_node then
+	if not node_target then
 		return entity_target
 	elseif not closest_entity then
 		return node_target
@@ -153,3 +159,4 @@ function arcana.target_at_point(point, dir, radius, exclude)
 
 	-- If there was nothing to hit we return nothing
 end
+
